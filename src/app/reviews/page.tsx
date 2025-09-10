@@ -1,6 +1,6 @@
 import React from "react";
 import SideBar from "../components/Sidebar";
-import AddReviewModal from "../components/ReviewsAdd";
+import AddReviewModal from "../components/ReviewAdd";
 import { MdDeleteOutline } from "react-icons/md";
 import EditReviewModal from "../components/ReviewsEdit";
 
