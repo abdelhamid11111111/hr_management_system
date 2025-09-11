@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SideBar from "../components/Sidebar";
 import AddDepartmentBtn from "../components/DptAdd";
 import { MdDeleteOutline } from "react-icons/md";
@@ -7,20 +7,29 @@ import EditDepartmentBtn from "../components/DptEdit";
 
 
 
+interface Departements{
+  name: string;
+  location: string;
+  date: string
+}
+
+
 const Department = () => {
 
-  const departments = [
-    { name: "Engineering", location: "San Francisco", date: "2022-01-15" },
-    { name: "Marketing", location: "New York", date: "2022-02-20" },
-    { name: "Sales", location: "Chicago", date: "2022-03-10" },
-    { name: "Product", location: "Seattle", date: "2022-04-05" },
-    { name: "HR", location: "Austin", date: "2022-05-12" },
-    { name: "Finance", location: "Boston", date: "2022-06-18" },
-    { name: "Operations", location: "Denver", date: "2022-07-22" },
-    { name: "Customer Support", location: "Miami", date: "2022-08-30" },
-    { name: "IT", location: "Dallas", date: "2022-09-15" },
-    { name: "Legal", location: "Atlanta", date: "2022-10-20" },
-  ];
+  const [departements, setDepartments] = useState<Departements[]>([])
+
+    useEffect(() => {
+      const fetchDpt = async () => {
+        try{
+        const res = await fetch('/api/department')
+        const data = await res.json()
+        setDepartments(data)
+        }catch(error){
+          console.error('error fetch data', error);
+        }
+      }
+      fetchDpt()
+    },[])
 
   return (
     <div className="relative flex min-h-screen flex-col bg-white overflow-x-hidden">
@@ -58,7 +67,7 @@ const Department = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {departments.map((dept, index) => (
+                    {departements.map((dept, index) => (
                       <tr key={index} className="border-t border-t-[#dbe0e6]">
                         <td className="h-[72px] px-4 py-2 w-[400px] text-[#111418] text-sm font-normal">
                           {dept.name}

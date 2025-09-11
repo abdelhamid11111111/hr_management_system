@@ -1,42 +1,29 @@
 'use client';
-import React from "react";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  useDisclosure,
-} from "@heroui/react";
+import React, { useState } from "react";
 
 export default function AddReviewModal() {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
       {/* Trigger button */}
       <button
-        onClick={onOpen}
+        onClick={() => setIsOpen(true)}
         className="flex items-center gap-2 cursor-pointer justify-center rounded-lg h-10 px-4 bg-blue-500 text-white text-base font-medium hover:bg-blue-600 transition-colors"
       >
         + Add Review
       </button>
 
       {/* Modal */}
-      <Modal
-        isOpen={isOpen}
-        onOpenChange={(open) => !open && onClose()}
-        placement="center"
-        backdrop="blur"
-        classNames={{ backdrop: "bg-white/30 backdrop-blur-sm" }}
-      >
-        
-        <ModalContent className="bg-white rounded-lg p-6 grid gap-6 shadow-lg w-full max-w-2xl">
-          <ModalHeader>
-            <h2 className="text-lg font-bold text-[#111418]">Add New Review</h2>
-          </ModalHeader>
-          <ModalBody>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-white rounded-lg p-6 shadow-lg w-full max-w-2xl">
+            {/* Header */}
+            <div className="mb-4">
+              <h2 className="text-lg font-bold text-[#111418]">Add New Review</h2>
+            </div>
+
+            {/* Body */}
             <form className="grid gap-4">
               {/* Employee */}
               <div className="flex flex-col gap-1">
@@ -77,17 +64,25 @@ export default function AddReviewModal() {
                 />
               </div>
             </form>
-          </ModalBody>
-          <ModalFooter className="flex gap-2 justify-end">
-            <Button variant="light" onPress={onClose} className="text-[#617589]">
-              Cancel
-            </Button>
-            <Button onPress={onClose} className="bg-blue-500 rounded-md text-white hover:bg-blue-600">
-              Add Review
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+
+            {/* Footer */}
+            <div className="flex gap-2 justify-end mt-6">
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-[#617589] bg-gray-100 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="bg-blue-500 rounded-md text-white px-4 py-2 hover:bg-blue-600 transition-colors"
+              >
+                Add Review
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

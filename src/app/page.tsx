@@ -1,3 +1,5 @@
+'use client'
+import React, {useState, useEffect} from "react";
 import SideBar from "./components/Sidebar";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { IoIosAdd } from "react-icons/io";
@@ -5,10 +7,47 @@ import AddBtn from "./components/EmployeeAdd";
 import { LiaEdit } from "react-icons/lia";
 import { MdDeleteOutline } from "react-icons/md";
 import EditEmployeeBtn from "./components/EmployeeEdit";
+import toast, { Toaster } from "react-hot-toast";
+import { Employee, EmployeeForm, Department } from '../types/employee'
+
+
+
+
+
 
 const Dashboard = () => {
+
+  const [employee, setEmployee] = useState<Employee[]>([])
+
+  useEffect(() => {
+    const fetchEmp = async () => {
+      try{
+      const res = await fetch('/api/employee')
+      const data = await res.json()
+      setEmployee(data)
+      }catch(error){
+        console.error('error fetch data', error);
+      }
+    }
+    fetchEmp()
+  },[])
+
+  const handleDelete = async (id: number | undefined) => {
+    try{
+      await fetch(`/api/employee/${id}`,{
+        method: 'DELETE'
+      })
+
+      toast.success('Book deleted successfully!');
+      setEmployee(employee.filter(prev => prev.id !== id))
+    } catch(error){
+      console.error('server error', error);
+    }
+  }
+
   return (
     <div className="relative flex size-full min-h-screen w-full flex-col bg-white group/design-root overflow-x-hidden font-sans">
+      <Toaster position="top-center" />
       <div className="layout-container flex h-full w-full grow flex-col">
         <div className="gap-1 px-6 flex flex-1 justify-center w-full py-5">
           <SideBar/>
@@ -19,7 +58,7 @@ const Dashboard = () => {
               <p className="text-[#111418] tracking-light text-[32px] font-bold leading-tight min-w-72">
                 Employees
               </p>
-              <AddBtn/>
+              <AddBtn onEmployeeAdded={(newEmp) => setEmployee(prev => [...prev, newEmp])}/>
 
             </div>
 
@@ -76,33 +115,39 @@ const Dashboard = () => {
                   
                   <tbody>
                     {/* Employee 1 */}
-                    <tr className="border-t border-t-[#dbe0e6]">
+                    {
+                      employee.map((emp) => (
+                      <tr key={emp.id} className="border-t border-t-[#dbe0e6]">
                       <td className="table-c3d280db-feb9-48b9-b23f-c5a750000196-column-56 h-[72px] px-4 py-2 w-14 text-sm font-normal leading-normal">
                         <div
                           className="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10"
-                          style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuAqwCJYikRva-lSP3dsfl0vtSOyX62fAorsqXqZLuKcx_2F-PhnvzjAHyUAre8BPIWV_ZnbaXcsDZV4451OvVat43u2RPbY23oL6hUcnSIp0PoF65gxsnYHAB3WdH4jsXUklah5TR2xlV5Qi7XO9_fwV33caNKeqNvLdQXPETtrSj8Ncwod7iuARtzEnYnT4KBgsoI8vSBbsor3-mhdh4i73DMqw5vr-GQ_4A2cduHMmb1vNe4LAYCDw_xBIl8MqNsObvyB3zD69vyW")'}}
+                          style={{
+                            backgroundImage: emp.profilePic
+                              ? `url(${emp.profilePic})`
+                              : 'none'
+                          }}
                         />
                       </td>
                       <td className="table-c3d280db-feb9-48b9-b23f-c5a750000196-column-176 h-[72px] px-4 py-2 w-[400px] text-[#111418] text-sm font-normal leading-normal">
-                        Sophia Clark
+                        {emp.name}
                       </td>
                       <td className="table-c3d280db-feb9-48b9-b23f-c5a750000196-column-296 h-[72px] px-4 py-2 w-[400px] text-[#617589] text-sm font-normal leading-normal">
-                        Marketing
+                        {emp.department?.name}
                       </td>
                       <td className="table-c3d280db-feb9-48b9-b23f-c5a750000196-column-416 h-[72px] px-4 py-2 w-[400px] text-[#617589] text-sm font-normal leading-normal">
-                        $65,000
+                        {emp.salary}$
                       </td>
                       <td className="table-c3d280db-feb9-48b9-b23f-c5a750000196-column-536 h-[72px] px-4 py-2 w-[400px] text-[#617589] text-sm font-normal leading-normal">
-                        (555) 123-4567
+                        {emp.phone}
                       </td>
                       <td className="table-c3d280db-feb9-48b9-b23f-c5a750000196-column-656 h-[72px] px-4 py-2 w-[400px] text-[#617589] text-sm font-normal leading-normal">
-                        sophia.clark@example.com
+                        {emp.email}
                       </td>
                       <td className="h-[72px] px-4 py-2 w-60 text-sm font-bold leading-normal tracking-[0.015em]">
                         <div className="flex items-center gap-2">
-                            <EditEmployeeBtn/>
+                            <EditEmployeeBtn id={emp.id}/>
                             <button 
-                              // onClick={() => handleDelete(book.id)}
+                              onClick={() => handleDelete(emp.id)}
                               className="inline-flex cursor-pointer items-center text-sm px-3 py-1.5 font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:border-red-300 outline-none  transition-all duration-150">
                                 <MdDeleteOutline size={20} />
                                 Delete
@@ -110,76 +155,9 @@ const Dashboard = () => {
                           </div>
                       </td>
                     </tr>
+                      ))
+                    }
 
-                    {/* Employee 2 */}
-                    <tr className="border-t border-t-[#dbe0e6]">
-                      <td className="table-c3d280db-feb9-48b9-b23f-c5a750000196-column-56 h-[72px] px-4 py-2 w-14 text-sm font-normal leading-normal">
-                        <div
-                          className="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10"
-                          style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuCLHPrADl-y3qaJFCqXZSvK_EptR16D6PVe3MoMzW4TmaNOr4Skho8eeepGLmotRjmW4PoApqDFsmKCWL4KrmfiIbVLj4G6L4Zgkc3b_Fvtq8G_8LCtbfehNuZjT2HHSfPofx-TZLqsAMbmsp9Uwda627o_pCkBcc8WNoRQffDwQimy6MAJh49fhwJ9G_6jpqic_B018bWxPwGAPmTeoummWgmnid3qaYBxrS8aN-84C1Yca5PdLkCZx9aKGPIZ2hCThqhubdEtFrbb")'}}
-                        />
-                      </td>
-                      <td className="table-c3d280db-feb9-48b9-b23f-c5a750000196-column-176 h-[72px] px-4 py-2 w-[400px] text-[#111418] text-sm font-normal leading-normal">
-                        Ethan Bennett
-                      </td>
-                      <td className="table-c3d280db-feb9-48b9-b23f-c5a750000196-column-296 h-[72px] px-4 py-2 w-[400px] text-[#617589] text-sm font-normal leading-normal">
-                        Sales
-                      </td>
-                      <td className="table-c3d280db-feb9-48b9-b23f-c5a750000196-column-416 h-[72px] px-4 py-2 w-[400px] text-[#617589] text-sm font-normal leading-normal">
-                        $70,000
-                      </td>
-                      <td className="table-c3d280db-feb9-48b9-b23f-c5a750000196-column-536 h-[72px] px-4 py-2 w-[400px] text-[#617589] text-sm font-normal leading-normal">
-                        (555) 987-6543
-                      </td>
-                      <td className="table-c3d280db-feb9-48b9-b23f-c5a750000196-column-656 h-[72px] px-4 py-2 w-[400px] text-[#617589] text-sm font-normal leading-normal">
-                        ethan.bennett@example.com
-                      </td>
-                      <td className="table-c3d280db-feb9-48b9-b23f-c5a750000196-column-776 h-[72px] px-4 py-2 w-60 text-[#617589] text-sm font-bold leading-normal tracking-[0.015em]">
-                        Edit | Delete
-                      </td>
-                    </tr>
-
-                    {/* Employee 3 */}
-                    <tr className="border-t border-t-[#dbe0e6]">
-                      <td className="table-c3d280db-feb9-48b9-b23f-c5a750000196-column-56 h-[72px] px-4 py-2 w-14 text-sm font-normal leading-normal">
-                        <div
-                          className="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10"
-                          style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuD0JO7ITBju2CKw0-94ag7QQ-wqo8MH2k_xVaUbdu1TPdabNTQB1XteZLbM3-XvNtt1rWQzyfjEny3m7XmAtpkDhvDq8QgtYQ0RTOjLA2E3ItFo_h6lV_0mgPbl5OD2dDzPDCcE4CQYqqZO2BzTalcyj_9RMYRUW7IJcvDZThXLojDvWvlmsZyzhpjbwwjNAbQZJtsi5C7bOw3t0L4YkAHga6Oe3gEzyNljFmFSuthW-4mWe_7jS77A4uoKqLsplcjGjeKnPS_CUatz")'}}
-                        />
-                      </td>
-                      <td className="table-c3d280db-feb9-48b9-b23f-c5a750000196-column-176 h-[72px] px-4 py-2 w-[400px] text-[#111418] text-sm font-normal leading-normal">
-                        Olivia Hayes
-                      </td>
-                      <td className="table-c3d280db-feb9-48b9-b23f-c5a750000196-column-296 h-[72px] px-4 py-2 w-[400px] text-[#617589] text-sm font-normal leading-normal">
-                        HR
-                      </td>
-                      <td className="table-c3d280db-feb9-48b9-b23f-c5a750000196-column-416 h-[72px] px-4 py-2 w-[400px] text-[#617589] text-sm font-normal leading-normal">
-                        $60,000
-                      </td>
-                      <td className="table-c3d280db-feb9-48b9-b23f-c5a750000196-column-536 h-[72px] px-4 py-2 w-[400px] text-[#617589] text-sm font-normal leading-normal">
-                        (555) 246-8013
-                      </td>
-                      <td className="table-c3d280db-feb9-48b9-b23f-c5a750000196-column-656 h-[72px] px-4 py-2 w-[400px] text-[#617589] text-sm font-normal leading-normal">
-                        olivia.hayes@example.com
-                      </td>
-                      <td className="h-[72px] px-4 py-2 w-60 text-sm font-bold leading-normal tracking-[0.015em]">
-                        <div className="flex items-center gap-2">
-                          {/* <Link href={`dashboard/book/${book.id}`}> */}
-                            <button 
-                              className="inline-flex cursor-pointer text-sm items-center px-3 py-1.5 font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 hover:border-blue-300 outline-none  transition-all duration-150">
-                              <LiaEdit size={20} />
-                              Edit
-                            </button>
-                          {/* </Link> */}
-                            <button 
-                              // onClick={() => handleDelete(book.id)}
-                              className="inline-flex cursor-pointer items-center text-sm px-3 py-1.5 font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:border-red-300 outline-none  transition-all duration-150">
-                                <MdDeleteOutline size={20} />
-                                Delete
-                            </button>
-                          </div>
-                      </td>
-                    </tr>
                   </tbody>
                 </table>
               </div>
